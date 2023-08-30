@@ -116,7 +116,7 @@ type SegmentationInput struct {
 }
 
 func (h *Handler) SegmentUser(c *fiber.Ctx) error {
-	_, err := GetUserId(c)
+	userId, err := GetUserId(c)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": err.Error(),
@@ -124,15 +124,27 @@ func (h *Handler) SegmentUser(c *fiber.Ctx) error {
 	}
 
 	input := SegmentationInput{}
-	if err := c.BodyParser(&input); err != nil {
+	if err = c.BodyParser(&input); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	// TODO: Segment user
+	if err = h.service.AddUserToSegments(userId, input.Add); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
 
-	return c.Status(fiber.StatusOK).JSON(&fiber.Map{})
+	if err = h.service.RemoveUserFromSegments(userId, input.Remove); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(&fiber.Map{
+		"message": "user successfully segmented",
+	})
 }
 
 func (h *Handler) GetActiveSegments(c *fiber.Ctx) error {

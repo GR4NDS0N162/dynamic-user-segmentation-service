@@ -60,7 +60,7 @@ func (r *Repository) GetSegments(slugs []string) ([]model.Segment, error) {
 }
 
 func (r *Repository) AddUserToSegments(userId int, segments []model.Segment) error {
-	user := model.Segment{ID: userId}
+	user := model.User{ID: userId}
 	result := r.db.FirstOrCreate(&user)
 	if result.Error != nil {
 		return result.Error
@@ -69,24 +69,24 @@ func (r *Repository) AddUserToSegments(userId int, segments []model.Segment) err
 	for _, segment := range segments {
 		action := model.Action{UserID: userId, SegmentID: segment.ID}
 		result = r.db.Last(&action, action)
-		if !errors.Is(result.Error, gorm.ErrRecordNotFound) && action.Type == 0 { // Пользователь уже в сегменте
-			continue
+
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) || action.Type == 1 { // Пользователь не сегментировался или был удален из этого сегмента
+			action = model.Action{UserID: userId, SegmentID: segment.ID, Type: 0}
+			result = r.db.Create(&action)
+			if result.Error != nil {
+				return result.Error
+			}
 		} else if result.Error != nil {
 			return result.Error
 		}
-
-		action = model.Action{UserID: userId, SegmentID: segment.ID, Type: 0}
-		result = r.db.Create(&action)
-		if result.Error != nil {
-			return result.Error
-		}
+		// Пользователь в этом сегменте
 	}
 
 	return nil
 }
 
 func (r *Repository) RemoveUserFromSegments(userId int, segments []model.Segment) error {
-	user := model.Segment{ID: userId}
+	user := model.User{ID: userId}
 	result := r.db.FirstOrCreate(&user)
 	if result.Error != nil {
 		return result.Error
@@ -95,12 +95,14 @@ func (r *Repository) RemoveUserFromSegments(userId int, segments []model.Segment
 	for _, segment := range segments {
 		action := model.Action{UserID: userId, SegmentID: segment.ID}
 		result = r.db.Last(&action, action)
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) || action.Type == 1 { // Пользователь не в сегменте
+
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) || action.Type == 1 { // Пользователь не сегментировался или вне этого сегмента
 			continue
 		} else if result.Error != nil {
 			return result.Error
 		}
 
+		// Пользователь был добавлен в этот сегмент, но не удален из него
 		action = model.Action{UserID: userId, SegmentID: segment.ID, Type: 1}
 		result = r.db.Create(&action)
 		if result.Error != nil {
