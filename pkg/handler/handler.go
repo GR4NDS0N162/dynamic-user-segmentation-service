@@ -25,7 +25,10 @@ func (h *Handler) InitRoutes() *fiber.App {
 		api.Delete("/delete_segment", h.DeleteSegment)
 		api.Post("/segment_user/:user_id", h.SegmentUser)
 		api.Get("/active_segment/:user_id", h.GetActiveSegments)
+		api.Get("/get_history", h.GetHistory)
 	}
+
+	app.Get("/download/:filename", h.GetFile)
 
 	return app
 }
@@ -163,4 +166,15 @@ func (h *Handler) GetActiveSegments(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(&slugs)
+}
+
+func (h *Handler) GetHistory(c *fiber.Ctx) error {
+	// TODO: Implement getting history
+	panic("Implement getting history")
+}
+
+func (h *Handler) GetFile(c *fiber.Ctx) error {
+	filename := c.Params("filename")
+	filePath := "./history" + filename
+	return c.Download(filePath)
 }
