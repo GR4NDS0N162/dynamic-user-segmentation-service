@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/GR4NDS0N162/dynamic-user-segmentation-service/pkg/service"
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,22 +29,88 @@ func (h *Handler) InitRoutes() *fiber.App {
 	return app
 }
 
+type SegmentInput struct {
+	Slug string
+}
+
 func (h *Handler) CreateSegment(c *fiber.Ctx) error {
-	// TODO: Implement segment creation
-	panic("Implement segment creation")
+	input := SegmentInput{}
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if input.Slug == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
+			"message": "slug cannot be empty",
+		})
+	}
+
+	// TODO: Create segment
+
+	return c.Status(fiber.StatusOK).JSON(&fiber.Map{
+		"message": "segment created successfully",
+	})
 }
 
 func (h *Handler) DeleteSegment(c *fiber.Ctx) error {
-	// TODO: Implement segment deletion
-	panic("Implement segment deletion")
+	input := SegmentInput{}
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if input.Slug == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
+			"message": "slug cannot be empty",
+		})
+	}
+
+	// TODO: Delete segment
+
+	return c.Status(fiber.StatusOK).JSON(&fiber.Map{
+		"message": "segment deleted successfully",
+	})
+}
+
+func GetUserId(c *fiber.Ctx) (int, error) {
+	id := c.Params("user_id", "")
+	if id == "" {
+		return 0, fmt.Errorf("user_id cannot be empty")
+	}
+
+	userId, err := strconv.Atoi(id)
+	if err != nil {
+		return 0, fmt.Errorf("user_id must be a number")
+	}
+
+	return userId, nil
 }
 
 func (h *Handler) SegmentUser(c *fiber.Ctx) error {
-	// TODO: Implement user segmentation
-	panic("Implement user segmentation")
+	_, err := GetUserId(c)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	// TODO: Segment user
+
+	return c.Status(fiber.StatusOK).JSON(&fiber.Map{})
 }
 
 func (h *Handler) GetActiveSegments(c *fiber.Ctx) error {
-	// TODO: Implement getting active segments
-	panic("Implement getting active segments")
+	_, err := GetUserId(c)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	// TODO: Get active segments
+
+	return c.Status(fiber.StatusOK).JSON(&fiber.Map{})
 }
