@@ -80,9 +80,18 @@ func (h *Handler) DeleteSegment(c *fiber.Ctx) error {
 		})
 	}
 
-	// TODO: Delete segment
+	deleted, err := h.service.DeleteSegment(input.Slug)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	} else if !deleted {
+		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
+			"message": "segment doesn't exists",
+		})
+	}
 
-	return c.Status(fiber.StatusOK).JSON(&fiber.Map{
+	return c.Status(fiber.StatusNoContent).JSON(&fiber.Map{
 		"message": "segment deleted successfully",
 	})
 }
