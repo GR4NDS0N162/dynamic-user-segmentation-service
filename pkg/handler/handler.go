@@ -110,10 +110,22 @@ func GetUserId(c *fiber.Ctx) (int, error) {
 	return userId, nil
 }
 
+type SegmentationInput struct {
+	Add    []string
+	Remove []string
+}
+
 func (h *Handler) SegmentUser(c *fiber.Ctx) error {
 	_, err := GetUserId(c)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	input := SegmentationInput{}
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
 			"message": err.Error(),
 		})
 	}
