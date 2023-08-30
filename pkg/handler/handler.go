@@ -148,14 +148,19 @@ func (h *Handler) SegmentUser(c *fiber.Ctx) error {
 }
 
 func (h *Handler) GetActiveSegments(c *fiber.Ctx) error {
-	_, err := GetUserId(c)
+	userId, err := GetUserId(c)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	// TODO: Get active segments
+	slugs, err := h.service.GetActiveSegments(userId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
 
-	return c.Status(fiber.StatusOK).JSON(&fiber.Map{})
+	return c.Status(fiber.StatusOK).JSON(&slugs)
 }

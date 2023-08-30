@@ -37,3 +37,16 @@ func (s *Service) RemoveUserFromSegments(userId int, slugs []string) error {
 
 	return s.repository.RemoveUserFromSegments(userId, segments)
 }
+
+func (s *Service) GetActiveSegments(userId int) (slugs []string, err error) {
+	segments, err := s.repository.GetActiveSegments(userId)
+	if err != nil {
+		return
+	}
+
+	slugs = []string{}
+	for _, segment := range segments {
+		slugs = append(slugs, segment.Slug)
+	}
+	return
+}

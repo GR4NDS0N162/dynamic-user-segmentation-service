@@ -112,3 +112,27 @@ func (r *Repository) RemoveUserFromSegments(userId int, segments []model.Segment
 
 	return nil
 }
+
+func (r *Repository) GetActiveSegments(userId int) (segments []model.Segment, err error) {
+	user := model.User{ID: userId}
+	err = r.db.FirstOrCreate(&user).Error
+	if err != nil {
+		return
+	}
+
+	var segmentIds []int
+	err = r.db.Model(&model.Action{}).
+		Select("segment_id").
+		Where("user_id = ?", userId).
+		Group("segment_id").
+		Having("count(id) % 2 != 0").
+		Pluck("segment_id", &segmentIds).Error
+	if err != nil {
+		return
+	}
+
+	if len(segmentIds) != 0 {
+		err = r.db.Find(&segments, segmentIds).Error
+	}
+	return
+}
