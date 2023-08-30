@@ -9,10 +9,11 @@ import (
 )
 
 type Handler struct {
+	service *service.Service
 }
 
 func NewHandler(service *service.Service) *Handler {
-	return &Handler{}
+	return &Handler{service: service}
 }
 
 func (h *Handler) InitRoutes() *fiber.App {
