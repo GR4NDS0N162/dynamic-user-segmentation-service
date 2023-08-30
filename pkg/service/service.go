@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/GR4NDS0N162/dynamic-user-segmentation-service/model"
 	"github.com/GR4NDS0N162/dynamic-user-segmentation-service/pkg/repository"
 )
 
@@ -13,6 +12,6 @@ func NewService(repo *repository.Repository) *Service {
 	return &Service{repository: repo}
 }
 
-func (s *Service) CreateSegment(slug string) (model.Segment, error) {
+func (s *Service) CreateSegment(slug string) (id int, affected bool, err error) {
 	return s.repository.CreateSegment(slug)
 }

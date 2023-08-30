@@ -48,10 +48,21 @@ func (h *Handler) CreateSegment(c *fiber.Ctx) error {
 		})
 	}
 
-	// TODO: Create segment
+	id, affected, err := h.service.CreateSegment(input.Slug)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
 
-	return c.Status(fiber.StatusOK).JSON(&fiber.Map{
-		"message": "segment created successfully",
+	if !affected {
+		return c.Status(fiber.StatusConflict).JSON(&fiber.Map{
+			"message": "segment already exists",
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(&fiber.Map{
+		"id": id,
 	})
 }
 

@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	"github.com/GR4NDS0N162/dynamic-user-segmentation-service/model"
 	"gorm.io/gorm"
 )
@@ -15,22 +13,22 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
-func (r *Repository) CreateSegment(slug string) (model.Segment, error) {
+func (r *Repository) CreateSegment(slug string) (id int, affected bool, err error) {
 	segment := model.Segment{Slug: slug}
 	result := r.db.Unscoped().FirstOrCreate(&segment, segment)
 
-	if result.Error != nil {
-		return segment, result.Error
+	id = segment.ID
+	affected = result.RowsAffected != 0
+	err = result.Error
+	if err != nil || (!affected && segment.IsDel == 0) {
+		return
 	}
 
-	if result.RowsAffected == 0 && segment.IsDel == 0 {
-		return segment, fmt.Errorf("segment %s already exists", slug)
-	}
+	segment.IsDel = 0
+	result = r.db.Save(&segment)
 
-	if segment.IsDel == 1 {
-		segment.IsDel = 0
-		r.db.Save(&segment)
-	}
-
-	return segment, nil
+	id = segment.ID
+	affected = result.RowsAffected != 0
+	err = result.Error
+	return
 }
