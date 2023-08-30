@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 
+	"github.com/GR4NDS0N162/dynamic-user-segmentation-service/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -26,7 +27,7 @@ func NewPostgresDB(cfg Config) (*gorm.DB, error) {
 		return db, err
 	}
 
-	err = db.AutoMigrate()
+	err = db.AutoMigrate(&model.User{}, &model.Segment{}, &model.Action{})
 	if err != nil {
 		return db, err
 	}
