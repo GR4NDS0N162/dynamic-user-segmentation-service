@@ -51,6 +51,10 @@ func (r *Repository) DeleteSegment(slug string) (deleted bool, err error) {
 
 func (r *Repository) GetSegments(slugs []string) ([]model.Segment, error) {
 	var segments []model.Segment
+	if len(slugs) == 0 {
+		return segments, nil
+	}
+
 	result := r.db.Where("slug IN ?", slugs).Find(&segments)
 	return segments, result.Error
 }
