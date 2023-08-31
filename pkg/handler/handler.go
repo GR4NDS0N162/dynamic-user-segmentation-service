@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/GR4NDS0N162/dynamic-user-segmentation-service/pkg/service"
@@ -168,13 +169,38 @@ func (h *Handler) GetActiveSegments(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(&slugs)
 }
 
+type HistoryInput struct {
+	Year  int
+	Month int
+}
+
 func (h *Handler) GetHistory(c *fiber.Ctx) error {
-	// TODO: Implement getting history
-	panic("Implement getting history")
+	input := HistoryInput{}
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if !(1 <= input.Month && input.Month <= 12) {
+		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
+			"message": "month is out of range",
+		})
+	}
+
+	filename, err := h.service.GetFile(input.Year, input.Month)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(&fiber.Map{
+		"url": fmt.Sprintf("http://localhost:%v/download/%s", os.Getenv("WEB_PORT"), filename),
+	})
 }
 
 func (h *Handler) GetFile(c *fiber.Ctx) error {
 	filename := c.Params("filename")
-	filePath := "./history" + filename
-	return c.Download(filePath)
+	return c.Download(filename)
 }
