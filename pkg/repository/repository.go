@@ -139,6 +139,7 @@ func (r *Repository) GetActiveSegments(userId int) (segments []model.Segment, er
 
 func (r *Repository) GetActions(year int, month int) (actions []model.Action, err error) {
 	err = r.db.Model(&model.Action{}).
+		Unscoped().
 		Where("EXTRACT(YEAR FROM created_at) = ?", year).
 		Where("EXTRACT(MONTH FROM created_at) = ?", month).
 		Preload("Segment").
