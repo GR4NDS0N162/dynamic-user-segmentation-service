@@ -68,6 +68,10 @@ func (s *Service) GetFile(year int, month int) (filename string, err error) {
 	}
 	filename = fmt.Sprintf("%v-%v-%v.csv", year, month, lastId)
 
+	if _, err = os.Stat(filename); err == nil {
+		return filename, nil
+	}
+
 	file, err := os.Create(filename)
 	if err != nil {
 		return
