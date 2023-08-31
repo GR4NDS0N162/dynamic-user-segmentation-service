@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/GR4NDS0N162/dynamic-user-segmentation-service/pkg/service"
@@ -25,7 +26,10 @@ func (h *Handler) InitRoutes() *fiber.App {
 		api.Delete("/delete_segment", h.DeleteSegment)
 		api.Post("/segment_user/:user_id", h.SegmentUser)
 		api.Get("/active_segment/:user_id", h.GetActiveSegments)
+		api.Get("/get_history", h.GetHistory)
 	}
+
+	app.Get("/download/:filename", h.GetFile)
 
 	return app
 }
@@ -163,4 +167,40 @@ func (h *Handler) GetActiveSegments(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(&slugs)
+}
+
+type HistoryInput struct {
+	Year  int
+	Month int
+}
+
+func (h *Handler) GetHistory(c *fiber.Ctx) error {
+	input := HistoryInput{}
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if !(1 <= input.Month && input.Month <= 12) {
+		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
+			"message": "month is out of range",
+		})
+	}
+
+	filename, err := h.service.GetFile(input.Year, input.Month)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(&fiber.Map{
+		"url": fmt.Sprintf("http://localhost:%v/download/%s", os.Getenv("WEB_PORT"), filename),
+	})
+}
+
+func (h *Handler) GetFile(c *fiber.Ctx) error {
+	filename := c.Params("filename")
+	return c.Download(filename)
 }

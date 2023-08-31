@@ -12,6 +12,7 @@ type Action struct {
 	Type      byte // 0 - add; 1 - remove
 	UserID    int
 	SegmentID int
+	Segment   Segment
 }
 
 type User struct {

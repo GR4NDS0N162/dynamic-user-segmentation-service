@@ -110,3 +110,4 @@ fabric.properties
 !.idea/runConfigurations
 
 /tmp/
+/*.csv
