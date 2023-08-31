@@ -1,6 +1,11 @@
 package service
 
 import (
+	"encoding/csv"
+	"fmt"
+	"os"
+	"strconv"
+
 	"github.com/GR4NDS0N162/dynamic-user-segmentation-service/pkg/repository"
 )
 
@@ -48,5 +53,48 @@ func (s *Service) GetActiveSegments(userId int) (slugs []string, err error) {
 	for _, segment := range segments {
 		slugs = append(slugs, segment.Slug)
 	}
+	return
+}
+
+func (s *Service) GetFile(year int, month int) (filename string, err error) {
+	actions, err := s.repository.GetActions(year, month)
+	if err != nil {
+		return
+	}
+
+	var lastId = 0
+	if len(actions) != 0 {
+		lastId = actions[len(actions)-1].ID
+	}
+	filename = fmt.Sprintf("%v-%v-%v.csv", year, month, lastId)
+
+	file, err := os.Create(filename)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	var records [][]string
+	for _, action := range actions {
+		var operation string
+		if action.Type == 0 {
+			operation = "Добавление"
+		} else {
+			operation = "Удаление"
+		}
+		records = append(records, []string{strconv.Itoa(action.UserID), action.Segment.Slug, operation, action.CreatedAt.String()})
+	}
+
+	err = writer.WriteAll(records)
+	if err != nil {
+		return
+	}
+
+	writer.Flush()
+	err = writer.Error()
+
 	return
 }
