@@ -6,7 +6,7 @@
 
 Необходимо иметь доступ к Docker Engine версией 19.03.0+.
 
-Запустить команду ```docker-compose up``` из корня проекта.
+Запустить команду `docker-compose up` из корня проекта.
 
 Когда в консоли появится сообщение подобное сообщению ниже, можно считать, что сервер запущен и способен обрабатывать
 запросы.
@@ -22,10 +22,10 @@
 └───────────────────────────────────────────────────┘
 ```
 
-По умолчанию сервер запускается на порту аналогичном порту контейнера, то есть ```:3000```.
+По умолчанию сервер запускается на порту аналогичном порту контейнера, то есть `:3000`.
 
-На тот случай если ваш порт ```:3000``` занят, можно поменять номер порта в файле "docker-compose.yml". Настройка порта
-находится по пути ```services.web.ports[0].published```.
+На тот случай если ваш порт `:3000` занят, можно поменять номер порта в файле "docker-compose.yml". Настройка порта
+находится по пути `services.web.ports[0].published`.
 
 Если вы перенастроили порт контейнера Docker, то и запросы нужно отправлять по адресу 127.0.0.1:{ваш порт}.
 
@@ -36,34 +36,34 @@
 Файл "docker-compose.yml":
 
 ```
-version: "3.8"  
-services:  
-  web:  
-    build: .  
-    env_file:  
-      - .env  
-    ports:  
-      - target: 3000  
-        published: 8080  
-        protocol: tcp  
-        mode: host  
-    volumes:  
-      - .:/usr/src/app  
-    command: air ./cmd/main.go -b 0.0.0.0  
-  db:  
-    image: postgres:latest  
-    environment:  
-      - POSTGRES_USER=${DB_USER}  
-      - POSTGRES_PASSWORD=${DB_PASSWORD}  
-      - POSTGRES_DB=${DB_NAME}  
-    ports:  
-      - target: 5432  
-        published: 5432  
-        protocol: tcp  
-        mode: host  
-    volumes:  
-      - postgres-db:/var/lib/postgresql/data  
-volumes:  
+version: "3.8"
+services:
+  web:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - target: 3000
+        published: 8080
+        protocol: tcp
+        mode: host
+    volumes:
+      - .:/usr/src/app
+    command: air ./cmd/main.go -b 0.0.0.0
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - target: 5432
+        published: 5432
+        protocol: tcp
+        mode: host
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+volumes:
   postgres-db:
 ```
 
@@ -71,7 +71,7 @@ volumes:
 
 ### Как нужно хранить информацию о связях между сегментами и пользователями?
 
-Так как был расчет на первое доп. задание, эти связи хранятся в *неявном* виде. Они хранятся в виде истории действий,
+Так как был расчет на первое доп. задание, эти связи хранятся в _неявном_ виде. Они хранятся в виде истории действий,
 которые происходили с пользователями и сегментами. Активные сегменты выводятся
 
 ### Что будет когда придет запрос на удаление сегмента?
